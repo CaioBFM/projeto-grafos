@@ -5,7 +5,6 @@ import os
 import psutil
 from heuristica import resolver_problema, info_serv, custo_serv_dict, custos_desloc
 
-
 def ler_instancia(caminho):
     try:
         with open(caminho, 'r', encoding='utf-8') as f:
