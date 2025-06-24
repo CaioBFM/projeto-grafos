@@ -63,7 +63,6 @@ def algoritmo_clarke_wright(servicos, deposito, matriz_distancias, capacidade):
     # Remove rotas vazias
     rotas = [r for r in rotas if r]
     return rotas
-
 def salvar_solucao(
     nome_arquivo,
     rotas,
@@ -124,7 +123,6 @@ def salvar_solucao(
             f.write(linha + "\n")
 
     print(f"Solução salva em '{nome_arquivo}' com {total_rotas} rotas e custo total {custo_total_solucao}.")
-    
 import random
 import copy
 
@@ -191,7 +189,6 @@ def perturbation(routes, capacity):
     return routes
 
 def iterated_local_search_optimized(servicos, distance_matrix, capacity, depot, iterations=30):
-    from heuristica import algoritmo_clarke_wright
     # Initial solution
     routes = algoritmo_clarke_wright(servicos, depot, distance_matrix, capacity)
     # 2-opt on each route
