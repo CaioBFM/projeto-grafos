@@ -1,5 +1,4 @@
 # Funções para leitura e escrita de arquivos do projeto CARP
-import os
 import csv
 
 def ler_instancia(caminho):

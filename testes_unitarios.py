@@ -114,5 +114,44 @@ def teste_unitario_rodar_uma_instancia():
     )
     print(f"Solução salva em {nome_saida}")
 
+# Teste unitário para gerar a coparacao_solucoes.csv
+def rodar_teste_unitario_automatico(nome_dat):
+    pasta_testes = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instancias')
+    pasta_resultados = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resultados')
+    os.makedirs(pasta_resultados, exist_ok=True)
+    arquivo = os.path.join(pasta_testes, nome_dat)
+    if not os.path.exists(arquivo):
+        print(f"Arquivo {arquivo} não encontrado!")
+        return
+    saida_base = os.path.join(pasta_resultados, f"sol-{os.path.splitext(os.path.basename(arquivo))[0]}")
+    v0, Q, arestas_req, arcos_req, nos, arestas_nr, arcos_nr = ler_instancia(arquivo)
+    servicos = []
+    id_servico = 1
+    for v, q in nos:
+        servicos.append({'id_servico': id_servico, 'origem': v, 'destino': v, 'demanda': q, 'custo_servico': 0})
+        id_servico += 1
+    for (u, v), c, q in arestas_req:
+        servicos.append({'id_servico': id_servico, 'origem': u, 'destino': v, 'demanda': q, 'custo_servico': c})
+        id_servico += 1
+    for (u, v), c, q in arcos_req:
+        servicos.append({'id_servico': id_servico, 'origem': u, 'destino': v, 'demanda': q, 'custo_servico': c})
+        id_servico += 1
+    grafo = construir_grafo(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
+    matriz_distancias = matriz_menores_distancias(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
+    if len(servicos) > 100:
+        rotas = algoritmo_clarke_wright(servicos, v0, matriz_distancias, Q)
+    else:
+        rotas = iterated_local_search_optimized(servicos, matriz_distancias, Q, v0, iterations=30)
+    nome_saida = saida_base + ".dat"
+    salvar_solucao(
+        nome_saida,
+        rotas,
+        matriz_distancias,
+        deposito=v0,
+        tempo_referencia_execucao=0,
+        tempo_referencia_solucao=0
+    )
+    print(f"Solução salva em {nome_saida}")
+
 if __name__ == '__main__':
     teste_unitario_rodar_uma_instancia()
