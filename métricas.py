@@ -1,9 +1,13 @@
-#-----------------------------------------#
-# Projeto Prático de Grafos - Etapa 1     #
-# Grupo:                                  #
-# Caio Bueno Finocchio Martins (202410377)#
-# Diego Alves de Oliveira (202410370)     #
-#-----------------------------------------#
+"""
+
+============================================================
+Projeto Prático de Grafos - Etapa 1
+Grupo:
+Caio Bueno Finocchio Martins (202410377)
+Diego Alves de Oliveira (202410370)     
+============================================================
+
+"""
 
 import numpy as np                      # Importando numpy para manipulação de matrizes
 import heapq                            # Importando heapq para implementação de fila de prioridade

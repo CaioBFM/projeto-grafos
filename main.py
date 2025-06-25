@@ -1,9 +1,9 @@
 import os
 import time
 import psutil
+import numpy as np
 from heuristica import algoritmo_clarke_wright, salvar_solucao, iterated_local_search_optimized
 from ler_escrever_arquivos import ler_instancia
-import numpy as np
 
 # Funções utilitárias para grafo e matriz de distâncias
 def construir_grafo(nos, arestas_req, arcos_req, arestas_nr, arcos_nr):
@@ -79,7 +79,6 @@ def main():
                 'custo_servico': c
             })
             id_servico += 1
-        grafo = construir_grafo(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
         matriz_distancias = matriz_menores_distancias(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
         clock_ini_sol = time.perf_counter_ns()
         if len(servicos) > 100:

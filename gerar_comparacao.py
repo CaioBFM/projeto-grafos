@@ -63,7 +63,7 @@ def main():
         else:
             diff = ""
         resultados.append([nome, sol_ref, sol_obt, diff])
-    with open(os.path.join("resultados", "comparacao_solucoes.csv"), "w", newline="") as f:
+    with open("comparacao_solucoes.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["Nome", "Solucao_Referencia", "Solucao_Obtida", "Diferenca"])
         writer.writerows(resultados)
