@@ -1,4 +1,21 @@
-def construir_rotas_iniciais(servicos, deposito, matriz_distancias, capacidade):
+import random
+import copy
+
+# heuristica para resolver o problema de roteamento de veículos (VRP) usando o algoritmo Clarke-Wright Savings
+def algoritmo_clarke_wright(servicos, deposito, matriz_distancias, capacidade):
+    rotas, demandas = construir_rotas_iniciais(servicos, deposito, capacidade)
+    savings = calcular_savings(rotas, matriz_distancias, deposito)
+
+    for s, i, j in savings:
+        if rotas[i] and rotas[j]:
+            tentar_fundir_rotas(rotas, demandas, i, j, capacidade)
+
+    # Remove rotas vazias
+    rotas = [r for r in rotas if r]
+    return rotas
+
+# fuções auxiliares para construir rotas iniciais, calcular savings e tentar fundir rotas
+def construir_rotas_iniciais(servicos, deposito, capacidade):
     rotas = []
     demandas = []
     for serv in servicos:
@@ -50,19 +67,7 @@ def tentar_fundir_rotas(rotas, demandas, idx_i, idx_j, capacidade):
     demandas[idx_j] = 0
     return True
 
-
-
-def algoritmo_clarke_wright(servicos, deposito, matriz_distancias, capacidade):
-    rotas, demandas = construir_rotas_iniciais(servicos, deposito, matriz_distancias, capacidade)
-    savings = calcular_savings(rotas, matriz_distancias, deposito)
-
-    for s, i, j in savings:
-        if rotas[i] and rotas[j]:
-            tentar_fundir_rotas(rotas, demandas, i, j, capacidade)
-
-    # Remove rotas vazias
-    rotas = [r for r in rotas if r]
-    return rotas
+# função para salvar a solução em um arquivo no formato especificado
 def salvar_solucao(
     nome_arquivo,
     rotas,
@@ -123,47 +128,32 @@ def salvar_solucao(
             f.write(linha + "\n")
 
     print(f"Solução salva em '{nome_arquivo}' com {total_rotas} rotas e custo total {custo_total_solucao}.")
-import random
-import copy
 
-def two_opt(route, distance_matrix, deposit, max_iter=10):
-    if len(route) < 3:
-        return route, False
-    best = route[:]
-    improved = False
-    best_cost = route_cost(route, distance_matrix, deposit)
-    count = 0
-    while count < max_iter:
-        found = False
-        for i in range(1, len(best) - 1):
-            for j in range(i + 1, len(best)):
-                new_route = best[:i] + best[i:j][::-1] + best[j:]
-                new_cost = route_cost(new_route, distance_matrix, deposit)
-                if new_cost < best_cost:
-                    best = new_route
-                    best_cost = new_cost
-                    improved = True
-                    found = True
-        if not found:
-            break
-        count += 1
-    return best, improved
-
-def route_cost(route, distance_matrix, deposit):
-    if not route:
-        return 0
-    cost = distance_matrix[deposit][route[0]['origem']]
-    for i in range(len(route) - 1):
-        cost += distance_matrix[route[i]['destino']][route[i+1]['origem']]
-    cost += distance_matrix[route[-1]['destino']][deposit]
-    cost += sum(s['custo_servico'] for s in route)
-    return cost
+# Metaheurística otimizada usando Iterated Local Search com 2-opt-simple
+def iterated_local_search_optimized(servicos, distance_matrix, capacity, depot, iterations=30):
+    # Solução inicial usando Clarke & Wright Savings
+    routes = algoritmo_clarke_wright(servicos, depot, distance_matrix, capacity)
+    # 2-opt-simple em cada rota
+    routes = [two_opt_simple(r, distance_matrix, depot) for r in routes]
+    best_routes = copy.deepcopy(routes)
+    best_cost = total_solution_cost(best_routes, distance_matrix, depot)
+    for _ in range(min(iterations, 10)):
+        # Perturbação
+        perturbed = perturbation(routes, capacity)
+        # 2-opt-simple na solução perturbada
+        perturbed = [two_opt_simple(r, distance_matrix, depot) for r in perturbed]
+        cost = total_solution_cost(perturbed, distance_matrix, depot)
+        if cost < best_cost:
+            best_routes = copy.deepcopy(perturbed)
+            best_cost = cost
+        routes = copy.deepcopy(perturbed)
+    return best_routes   
 
 def total_solution_cost(routes, distance_matrix, depot):
     return sum(route_cost(r, distance_matrix, depot) for r in routes)
 
 def perturbation(routes, capacity):
-    # Remove 2-3 random services and reinsert into other routes
+    # remove 2 ou 3 serviços aleatórios e reinserir em rotas válidas
     routes = copy.deepcopy(routes)
     all_services = [(i, idx) for i, r in enumerate(routes) for idx in range(len(r))]
     if len(all_services) < 3:
@@ -174,38 +164,19 @@ def perturbation(routes, capacity):
     for i, idx in sorted(remove_indices, reverse=True):
         removed.append(routes[i][idx])
         del routes[i][idx]
-    # Reinsert removed services into random routes (with capacity check)
+    # reinserir serviços removidos
     for serv in removed:
         possible = [i for i, r in enumerate(routes) if sum(s['demanda'] for s in r) + serv['demanda'] <= capacity]
         if not possible:
-            # If nowhere fits, create a new route
+            # se nenhum rota possível, criar nova rota
             routes.append([serv])
         else:
             i = random.choice(possible)
             insert_pos = random.randint(0, len(routes[i]))
             routes[i].insert(insert_pos, serv)
-    # Remove empty routes
+    # remove rotas vazias
     routes = [r for r in routes if r]
     return routes
-
-def iterated_local_search_optimized(servicos, distance_matrix, capacity, depot, iterations=30):
-    # Initial solution
-    routes = algoritmo_clarke_wright(servicos, depot, distance_matrix, capacity)
-    # 2-opt on each route
-    routes = [two_opt_simple(r, distance_matrix, depot) for r in routes]
-    best_routes = copy.deepcopy(routes)
-    best_cost = total_solution_cost(best_routes, distance_matrix, depot)
-    for _ in range(min(iterations, 10)):
-        # Perturbation
-        perturbed = perturbation(routes, capacity)
-        # 2-opt on perturbed solution
-        perturbed = [two_opt_simple(r, distance_matrix, depot) for r in perturbed]
-        cost = total_solution_cost(perturbed, distance_matrix, depot)
-        if cost < best_cost:
-            best_routes = copy.deepcopy(perturbed)
-            best_cost = cost
-        routes = copy.deepcopy(perturbed)
-    return best_routes
 
 def two_opt_simple(route, distance_matrix, depot):
     if len(route) < 3:
@@ -226,3 +197,20 @@ def two_opt_simple(route, distance_matrix, depot):
         if improved:
             break
     return best
+
+def route_cost(route, distance_matrix, deposit):
+    if not route:
+        return 0
+    cost = distance_matrix[deposit][route[0]['origem']]
+    for i in range(len(route) - 1):
+        cost += distance_matrix[route[i]['destino']][route[i+1]['origem']]
+    cost += distance_matrix[route[-1]['destino']][deposit]
+    cost += sum(s['custo_servico'] for s in route)
+    return cost
+
+
+
+
+
+
+
