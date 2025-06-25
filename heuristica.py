@@ -9,7 +9,7 @@ def iterated_local_search_optimized(servicos, distance_matrix, capacity, depot, 
     routes = [two_opt_simple(r, distance_matrix, depot) for r in routes]
     best_routes = copy.deepcopy(routes)
     best_cost = total_solution_cost(best_routes, distance_matrix, depot)
-    for _ in range(min(iterations, 10)):
+    for _ in range(min(iterations, 200)):
         # Perturbação
         perturbed = perturbation(routes, capacity)
         # 2-opt-simple na solução perturbada
