@@ -1,13 +1,5 @@
-import numpy as np
-
+# Função para ler a instância do problema a partir de um arquivo .dat e retorna os dados estruturados
 def ler_instancia(caminho):
-    """
-    Lê um arquivo de instância .dat do CARP e retorna os dados estruturados.
-    Parâmetros:
-        caminho (str): Caminho do arquivo .dat
-    Retorna:
-        tuple: (deposito, capacidade, arestas_req, arcos_req, nos, arestas_nr, arcos_nr)
-    """
     try:
         with open(caminho, 'r', encoding='utf-8') as f:
             linhas = [l.rstrip() for l in f if l.strip()]
@@ -61,14 +53,11 @@ def ler_instancia(caminho):
         return deposito, capacidade, arestas_req, arcos_req, nos, arestas_nr, arcos_nr
     except Exception as e:
         raise RuntimeError(f"Erro ao ler instância: {e}")
+    
+import numpy as np
 
+# Função para construir o grafo e os dados a partir das listas de nós, arestas e arcos
 def construir_grafo_e_dados(nos, arestas_req, arcos_req, arestas_nr, arcos_nr):
-    """
-    Constrói a matriz de adjacência (grafo) e um dicionário de dados a partir das listas de nós, arestas e arcos.
-    Retorna:
-        grafo (np.ndarray): matriz de adjacência (infinito para não conexões)
-        dados (dict): informações detalhadas da instância
-    """
     vertices = set()
     for v, _ in nos:
         vertices.add(v)
