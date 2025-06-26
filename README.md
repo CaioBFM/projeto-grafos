@@ -66,7 +66,7 @@ projeto-grafos/
 ### 1. Navegue até o diretório do projeto
 
 ```
-cd /caminho/para/seu/graph_routing_solver
+cd /caminho/para/seu/projeto-grafos
 ```
 
 ### 2. Depêndencias
