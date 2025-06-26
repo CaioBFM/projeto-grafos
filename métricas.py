@@ -1,30 +1,17 @@
-"""
-
-============================================================
-Projeto Prático de Grafos - Etapa 1
-Grupo:
-Caio Bueno Finocchio Martins (202410377)
-Diego Alves de Oliveira (202410370)     
-============================================================
-
-"""
+# Projeto Prático de Grafos - Etapa 1
 
 import numpy as np                      # Importando numpy para manipulação de matrizes
-import heapq                            # Importando heapq para implementação de fila de prioridade
+import heapq                            
 
-# Declarando variável global grafo (para visualização)
 global_grafo = None
 
+# Função para carregar o grafo e os dados a partir de linhas já lidas (não lê arquivo)
+def carregar_grafo_de_linhas(linhas):
+    dados = extrair_dados_instancia(linhas)
+    return dados["grafo"], dados
+
 # Função para extrair dados relevantes de uma lista de linhas de um arquivo .dat já lido
-# (Agora recebe as linhas já lidas, não faz leitura de arquivo)
 def extrair_dados_instancia(linhas):
-    """
-    Realiza o parsing das linhas de uma instância .dat do CARP e retorna um dicionário com os dados estruturados.
-    Parâmetros:
-        linhas (list[str]): Linhas do arquivo .dat já lidas em memória.
-    Retorna:
-        dict: Dicionário com informações do grafo, demandas, arestas, arcos, etc.
-    """
     qtd_veiculos = int(linhas[2].split()[-1])
     capacidade = int(linhas[3].split()[-1])
     deposito = int(linhas[4].split()[-1])
@@ -122,15 +109,6 @@ def extrair_dados_instancia(linhas):
 
 # Função para calcular a densidade do grafo
 def densidade(qtd_vertices, qtd_arestas, qtd_arcos):
-    """
-    Calcula a densidade do grafo considerando arestas e arcos.
-    Parâmetros:
-        qtd_vertices (int): Número de vértices.
-        qtd_arestas (int): Número de arestas.
-        qtd_arcos (int): Número de arcos.
-    Retorna:
-        float: Densidade do grafo.
-    """
     max_ligacoes_arestas = (qtd_vertices * (qtd_vertices - 1)) / 2
     max_ligacoes_arcos = (qtd_vertices * (qtd_vertices - 1))
     total_ligacoes = max_ligacoes_arestas + max_ligacoes_arcos
@@ -138,13 +116,6 @@ def densidade(qtd_vertices, qtd_arestas, qtd_arcos):
 
 # Função para calcular os graus dos vértices
 def calcula_graus(dados):
-    """
-    Calcula o grau de cada vértice (arestas, entrada, saída, total).
-    Parâmetros:
-        dados (dict): Dicionário retornado por extrair_dados_instancia.
-    Retorna:
-        list[tuple]: Lista de tuplas (vértice, grau_arestas, grau_entrada, grau_saida, total).
-    """
     qtd_vertices = dados["qtd_vertices"]
     grau_arestas = [0] * (qtd_vertices + 1)
     grau_entrada = [0] * (qtd_vertices + 1)
@@ -165,16 +136,23 @@ def calcula_graus(dados):
 
     return resultado
 
+# Função para calcular todas as distâncias usando Dijkstra
+def calcular_todas_distancias_dijkstra(grafo):
+    n = grafo.shape[0]
+    distancias = np.full((n, n), np.inf)
+    predecessores = np.full((n, n), -1)
+    
+    for i in range(n):
+        dist, pred = dijkstra(grafo, i)
+        for j in range(n):
+            distancias[i][j] = dist[j]
+            predecessores[i][j] = pred[j]
+    
+    np.fill_diagonal(distancias, 0)
+    return distancias, predecessores
+
 # Implementação do algoritmo de Dijkstra
 def dijkstra(grafo, inicio):
-    """
-    Executa o algoritmo de Dijkstra para encontrar menores caminhos a partir de um vértice.
-    Parâmetros:
-        grafo (np.ndarray): Matriz de adjacência.
-        inicio (int): Vértice de origem.
-    Retorna:
-        tuple: (distancias, predecessores) para todos os vértices.
-    """
     n = grafo.shape[0]
     distancias = {v: float('inf') for v in range(n)}
     predecessores = {v: -1 for v in range(n)}
@@ -204,37 +182,8 @@ def dijkstra(grafo, inicio):
     
     return distancias, predecessores
 
-# Função para calcular todas as distâncias usando Dijkstra
-def calcular_todas_distancias_dijkstra(grafo):
-    """
-    Calcula todas as distâncias e predecessores entre todos os pares de vértices usando Dijkstra.
-    Parâmetros:
-        grafo (np.ndarray): Matriz de adjacência.
-    Retorna:
-        tuple: (matriz de distâncias, matriz de predecessores)
-    """
-    n = grafo.shape[0]
-    distancias = np.full((n, n), np.inf)
-    predecessores = np.full((n, n), -1)
-    
-    for i in range(n):
-        dist, pred = dijkstra(grafo, i)
-        for j in range(n):
-            distancias[i][j] = dist[j]
-            predecessores[i][j] = pred[j]
-    
-    np.fill_diagonal(distancias, 0)
-    return distancias, predecessores
-
 # Função de Floyd-Warshall para comparação
 def floyd_warshall(grafo):
-    """
-    Executa o algoritmo de Floyd-Warshall para todos os pares de vértices.
-    Parâmetros:
-        grafo (np.ndarray): Matriz de adjacência.
-    Retorna:
-        tuple: (matriz de distâncias, matriz de predecessores)
-    """
     n = grafo.shape[0]
     distancia = grafo.copy()
     predecessores = np.full((n, n), -1)
@@ -255,13 +204,6 @@ def floyd_warshall(grafo):
 
 # Função para calcular o caminho médio entre todos os pares de vértices
 def caminho_medio(distancias):
-    """
-    Calcula o caminho médio entre todos os pares de vértices do grafo.
-    Parâmetros:
-        distancias (np.ndarray): Matriz de distâncias.
-    Retorna:
-        float: Caminho médio.
-    """
     n = distancias.shape[0]
     soma = 0
     cont = 0
@@ -274,13 +216,6 @@ def caminho_medio(distancias):
 
 # Função para calcular o diâmetro do grafo
 def diametro(distancias):
-    """
-    Calcula o diâmetro do grafo (maior menor caminho).
-    Parâmetros:
-        distancias (np.ndarray): Matriz de distâncias.
-    Retorna:
-        int: Diâmetro do grafo.
-    """
     n = distancias.shape[0]
     max_dist = 0
     for i in range(1, n):
@@ -289,17 +224,8 @@ def diametro(distancias):
                 max_dist = max(max_dist, distancias[i][j])
     return int(max_dist)
 
-# Função para reconstruir o caminho mais curto
+# Função para reconstruir o caminho mais curto usando predecessores
 def reconstruir_caminho(predecessores, inicio, fim):
-    """
-    Reconstrói o caminho mais curto entre dois vértices usando a matriz de predecessores.
-    Parâmetros:
-        predecessores (dict ou np.ndarray): Predecessores de cada vértice.
-        inicio (int): Vértice de origem.
-        fim (int): Vértice de destino.
-    Retorna:
-        list[int] ou None: Lista de vértices do caminho ou None se não existe.
-    """
     caminho = []
     atual = fim
     
@@ -314,14 +240,6 @@ def reconstruir_caminho(predecessores, inicio, fim):
 
 # Função para calcular a intermediação de cada vértice usando Dijkstra
 def calcula_intermediacao(vertices, grafo):
-    """
-    Calcula a intermediação (betweenness) de cada vértice usando caminhos mínimos.
-    Parâmetros:
-        vertices (list[int]): Lista de vértices.
-        grafo (np.ndarray): Matriz de adjacência.
-    Retorna:
-        dict: Dicionário {vértice: valor de intermediação}
-    """
     intermediacao = {v: 0 for v in vertices}
     
     for u in vertices:
@@ -334,15 +252,3 @@ def calcula_intermediacao(vertices, grafo):
                         intermediacao[vertice] += 1
     
     return intermediacao
-
-# Função para carregar o grafo e os dados a partir de linhas já lidas (não lê arquivo)
-def carregar_grafo_de_linhas(linhas):
-    """
-    Realiza o parsing das linhas e retorna a matriz de adjacência e o dicionário de dados.
-    Parâmetros:
-        linhas (list[str]): Linhas do arquivo .dat já lidas em memória.
-    Retorna:
-        tuple: (grafo, dados)
-    """
-    dados = extrair_dados_instancia(linhas)
-    return dados["grafo"], dados
