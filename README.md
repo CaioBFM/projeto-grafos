@@ -1,118 +1,156 @@
-# Projeto: GRAFOS - ETAPA 2
+# Projeto: Capacitated Arc Routing Problem (CARP) — Soluções Heurísticas e Metaheurísticas
 
-Este projeto resolve o problema de roteamento de serviços em grafos (CARP - Capacitated Arc Routing Problem) utilizando heurísticas e metaheurísticas avançadas. O código lê instâncias do problema a partir de arquivos `.dat`, gera soluções otimizadas e permite análise e visualização dos resultados.
+Este projeto resolve o problema de roteamento de serviços em grafos (CARP - Capacitated Arc Routing Problem) utilizando heurísticas e metaheurísticas modernas. O objetivo é encontrar rotas otimizadas para veículos que devem atender demandas em vértices, arestas e arcos de um grafo, respeitando restrições de capacidade.
+
+## Sumário
+
+- [Descrição Geral](#descrição-geral)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Funcionalidades](#funcionalidades)
+- [Como Executar](#como-executar)
+- [Formato dos Arquivos](#formato-dos-arquivos)
+- [Visualização e Análise](#visualização-e-análise)
+- [Feedback e Contato](#Feedback-e-Contato)
+- [Licença](#licença)
 
 ---
 
 ## Descrição Geral
 
-O objetivo é processar instâncias de grafos (em arquivos `.dat`), calcular rotas otimizadas para serviços em vértices, arestas e arcos, e exportar as soluções em formato padronizado. O projeto utiliza o algoritmo de **Clarke & Wright Savings** e uma metaheurística Iterated Local Search (ILS) para instâncias pequenas, escolhendo automaticamente a abordagem mais eficiente conforme o tamanho do problema.
+O projeto lê instâncias do CARP a partir de arquivos `.dat`, processa cada instância com algoritmos eficientes (Clarke & Wright, GRASP, ILS), exporta as soluções em formato padronizado e permite análise comparativa e visualização gráfica dos resultados.
+
+- **Problema resolvido:** CARP (roteamento de veículos em grafos com restrições de capacidade)
+- **Abordagens:** Algoritmo de Clarke & Wright, GRASP (Greedy Randomized Adaptive Search Procedure), Iterated Local Search (ILS)
+- **Resultados:** Soluções salvas em arquivos, métricas de desempenho, comparação com valores de referência, visualização gráfica
 
 ---
 
-## Estrutura dos Arquivos e Pastas
+## Estrutura do Projeto
 
-- `main.py`: Executa todas as instâncias da pasta `instancias/`, identifica automaticamente se o grafo é pequeno (≤ 100 serviços) ou grande (> 100 serviços) e escolhe a abordagem adequada:
-  - Pequeno: usa a metaheurística otimizada (ILS)
-  - Grande: usa apenas Clarke & Wright
-  - O nome do arquivo de saída indica o método: `-ils.dat` (ILS) ou `-cw.dat` (Clarke & Wright)
-- `testes_unitarios.py`: Permite rodar e validar uma instância específica, útil para depuração e análise detalhada. Também identifica automaticamente o tipo de grafo e salva o resultado com o sufixo correspondente.
-- `heuristica.py`: Implementa as heurísticas e metaheurísticas (Clarke & Wright, ILS, operadores locais, etc).
-- `ler_escrever_arquivos.py`: Funções para leitura das instâncias e utilidades de entrada/saída.
-- `resultados/`: Pasta onde as soluções geradas são salvas automaticamente, uma para cada instância processada. O nome do arquivo indica o método utilizado (`-ils.dat` ou `-cw.dat`).
-- `instancias/`: Pasta com as instâncias do problema no formato `.dat`.
-- `visualizar.ipynb`: Notebook para visualizar graficamente as soluções salvas em `resultados/`.
-
----
-
-## Como Executar
-
-### 1. Pré-requisitos
-
-- Python 3.7+
-- numpy
-- psutil
-
-Instale as dependências com:
-
-```powershell
-pip install numpy psutil
 ```
-
-### 2. Gerar Soluções para Todas as Instâncias
-
-Coloque os arquivos `.dat` das instâncias na pasta `instancias/`.
-Execute:
-
-```powershell
-python main.py
+projeto-grafos/
+│
+├── instancias/              # Instâncias do problema (.dat)
+├── resultados/              # Soluções geradas para cada instância
+├── comparacao_solucoes.csv  # Comparação entre soluções obtidas e referência
+├── gerar_comparacao.py      # Gera comparacao_solucoes.csv
+├── grafo_utils.py           # Funções utilitárias para criação de grafos e leitura de instâncias
+├── heuristica.py            # Implementação das heurísticas e metaheurísticas
+├── main.py                  # Executa todas as instâncias e gera soluções
+├── métricas.py              # Cálculo de métricas e propriedades dos grafos
+├── README.md                # Este arquivo
+├── reference_values.csv     # Valores de referência para cada instância
+├── testes_unitarios.py      # Testes unitários e execução de instâncias individuais
+└── visualizar.ipynb         # Notebook para visualização gráfica das soluções
 ```
-
-O código irá processar cada instância, escolher o método adequado e salvar a solução na pasta `resultados/` com o sufixo indicando o método utilizado.
-
-### 3. Rodar Teste Unitário em Uma Instância
-
-Execute:
-
-```powershell
-python testes_unitarios.py
-```
-
-Digite o nome do arquivo `.dat` desejado (ex: `BHW1.dat`) quando solicitado. O resultado será salvo em `resultados/` e exibido no terminal, com o sufixo indicando o método utilizado.
-
-### 4. Visualizar Soluções Geradas
-
-Abra o notebook `visualizar.ipynb` no Jupyter ou VSCode. Siga as instruções do notebook para carregar e visualizar graficamente as soluções da pasta `resultados/`.
 
 ---
 
 ## Funcionalidades
 
-- Leitura completa de arquivos `.dat` estruturados.
-- Construção de matrizes de menor distância entre pares (via algoritmo de Floyd-Warshall).
-- Execução do algoritmo **Clarke-Wright Savings** e da metaheurística ILS para instâncias pequenas.
-- Exportação automática das soluções em formato padronizado.
-- Cálculo de métricas de tempo em ciclos de CPU.
-- Visualização gráfica das soluções via notebook.
+- **Leitura e processamento de instâncias** no formato `.dat`
+- **Execução de heurísticas**:
+  - Clarke & Wright Savings (para instâncias grandes)
+  - Iterated Local Search (ILS) (refino das soluções de instâncias grandes)
+  - GRASP + 2-opt (para instâncias pequenas)
+- **Exportação padronizada das soluções** (incluindo rotas, custos, tempos)
+- **Comparação automática** com valores de referência
+- **Visualização gráfica** das soluções e métricas no notebook
+- **Execução paralela** para acelerar o processamento de múltiplas instâncias
+- **Testes unitários** para validação de instâncias individuais
+
+---
+
+## Como Executar
+
+### 1. Navegue até o diretório do projeto
+
+```
+cd /caminho/para/seu/graph_routing_solver
+```
+
+### 2. Depêndencias
+
+- Python 3.7+
+- numpy
+- psutil
+
+```powershell
+pip install numpy psutil
+```
+
+### 3. Gerar soluções para todas as instâncias
+
+```powershell
+python main.py
+```
+
+As soluções serão salvas em `resultados/`.
+
+### 4. Executar um teste unitário em uma instância específica
+
+```powershell
+python testes_unitarios.py
+# Digite o nome do arquivo .dat (ex: BHW1.dat): mggdb_0.30_19.dat
+```
+
+Digite o nome do arquivo `.dat` quando solicitado.
+
+### 5. Gerar o arquivo de comparação
+
+```powershell
+python gerar_comparacao.py
+```
+
+Isso executa 4 testes selecionados de cada grupo de instâncias, compara com os valores de referência e gera `comparacao_solucoes.csv`.
+
+### 6. Visualize as soluções
+
+Abra o notebook `visualizar.ipynb` no Jupyter ou VSCode para visualizar graficamente as métricas (soluções da Etapa 1).
 
 ---
 
 ## Formato dos Arquivos
 
-### Entrada (`.dat`)
+### Instâncias (`instancias/*.dat`)
 
-- Arquivos `.dat` devem seguir o padrão de instâncias CARP, com campos separados por TAB e blocos para nós, arestas, arcos e demandas.
-- Veja exemplos na pasta `instancias/`.
+Arquivos de texto estruturados contendo vértices, arestas, arcos, demandas e capacidades.
 
-### Saída (`resultados/`)
+### Soluções (`resultados/sol-*.dat`)
 
-- Cada arquivo de solução contém:
-  - Custo total da solução
-  - Total de rotas
-  - Tempos de referência de execução e solução
-  - Descrição detalhada das rotas
+Arquivos de texto com as rotas encontradas, custos e clocks.
 
-Exemplo de saída:
+### Comparação (`comparacao_solucoes.csv`)
 
-```
-337
-6
-14561498
-64474
-0 1 1 5 61  7 (D 0,1,1) (S 21,1,7) (S 14,7,8) (S 28,8,10) (S 3,10,10) (S 17,10,9) (D 0,1,1)
-...
-```
+CSV com as colunas:
+
+- Nome da instância
+- Solução de referência
+- Solução obtida
+- Diferença (solução de referência - solução obtida)
+
+### Valores de referência (`reference_values.csv`)
+
+CSV com os valores de referência para cada instância, número de rotas e métricas de tempo (valores próximo do ótimo disponibilizados pelo Docente).
 
 ---
 
-## Observações
+## Visualização e Análise
 
-- O código utiliza uma metaheurística robusta (ILS) baseada em Clarke & Wright, com busca local e perturbação, garantindo soluções de alta qualidade para instâncias pequenas.
-- Para instâncias grandes, utiliza-se apenas Clarke & Wright para garantir eficiência.
-- O notebook de visualização facilita a análise gráfica dos resultados.
-- Os testes unitários permitem validar rapidamente o funcionamento para qualquer instância.
-- As soluções são exportadas no formato esperado para avaliação ou uso posterior.
+- O notebook `visualizar.ipynb` vizualização em graficos e tabelas das soluções obtidas em métricas.py
+- O arquivo `métricas.py` contém funções para análise estrutural dos grafos (graus, densidade, diâmetro, etc).
 
 ---
 
-Para dúvidas ou sugestões, consulte o código-fonte ou entre em contato com os autores.
+## Feedback e Contato
+
+Para fornecer feedback ou entrar em contato, sinta-se à vontade para enviar um e-mail para
+
+- caiofinocchio@outlook.com
+- diegoalves.div@gmail.com
+
+---
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
