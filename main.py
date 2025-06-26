@@ -1,22 +1,11 @@
 import os
 import time
 import psutil
-from concurrent.futures import ProcessPoolExecutor
-from heuristica import algoritmo_clarke_wright, salvar_solucao, iterated_local_search_optimized
+from concurrent.futures import ProcessPoolExecutor # ProcessPoolExecutor para paralelizar o processamento melhorando o desempenho
+from heuristica import salvar_solucao, iterated_local_search_optimized, grasp_heuristic
 from grafo_utils import construir_grafo_e_dados, ler_instancia
 
-# Função utilitária para matriz de distâncias
-def matriz_menores_distancias(nos, arestas_req, arcos_req, arestas_nr, arcos_nr):
-    grafo, _ = construir_grafo_e_dados(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
-    n = grafo.shape[0]
-    dist = grafo.copy()
-    for k in range(n):
-        for i in range(n):
-            for j in range(n):
-                if dist[i][j] > dist[i][k] + dist[k][j]:
-                    dist[i][j] = dist[i][k] + dist[k][j]
-    return dist
-
+# Função para processar cada instância
 def processar_instancia(arquivo, pasta_testes, pasta_resultados):
     instancia = os.path.join(pasta_testes, arquivo)
     saida_base = os.path.join(pasta_resultados, f"sol-{os.path.splitext(os.path.basename(instancia))[0]}")
@@ -54,17 +43,13 @@ def processar_instancia(arquivo, pasta_testes, pasta_resultados):
             'custo_servico': c
         })
         id_servico += 1
-    grafo, dados = construir_grafo_e_dados(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
     matriz_distancias = matriz_menores_distancias(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
     clock_ini_sol = time.perf_counter_ns()
-    if len(servicos) > 100:
-        # Grafo grande: apenas Clarke & Wright
-        rotas = algoritmo_clarke_wright(servicos, v0, matriz_distancias, Q)
-        nome_saida = saida_base + ".dat"
+    if len(servicos) > 200: 
+        rotas = iterated_local_search_optimized(servicos, matriz_distancias, Q, v0, iterations=100) # aumento do numero de perturbações para melhores resultados
     else:
-        # Grafo pequeno: metaheurística otimizada
-        rotas = iterated_local_search_optimized(servicos, matriz_distancias, Q, v0, iterations=30)
-        nome_saida = saida_base + ".dat"
+        rotas = grasp_heuristic(servicos, matriz_distancias, Q, v0, iterations=100, alpha=0.2)
+    nome_saida = saida_base + ".dat"
     clock_fim_sol = time.perf_counter_ns()
     clock_sol = clock_fim_sol - clock_ini_sol
     clock_fim_total = time.perf_counter_ns()
@@ -81,6 +66,19 @@ def processar_instancia(arquivo, pasta_testes, pasta_resultados):
         tempo_referencia_solucao=ciclos_estimados_melhor_sol
     )
 
+# Função utilitária para matriz de distâncias (fw)
+def matriz_menores_distancias(nos, arestas_req, arcos_req, arestas_nr, arcos_nr):
+    grafo, _ = construir_grafo_e_dados(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
+    n = grafo.shape[0]
+    dist = grafo.copy()
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][j] > dist[i][k] + dist[k][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    return dist
+
+# Função principal para executar o processamento de instâncias
 def main():
     pasta_testes = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instancias')
     pasta_resultados = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resultados')
