@@ -107,7 +107,7 @@ def extrair_dados_instancia(linhas):
         "grafo": grafo
     }
 
-# Função para calcular a densidade do grafo
+# Função para calcular a densidade do grafo (próximo de 1 é denso, próximo de 0 é esparso)
 def densidade(qtd_vertices, qtd_arestas, qtd_arcos):
     max_ligacoes_arestas = (qtd_vertices * (qtd_vertices - 1)) / 2
     max_ligacoes_arcos = (qtd_vertices * (qtd_vertices - 1))
@@ -136,7 +136,7 @@ def calcula_graus(dados):
 
     return resultado
 
-# Função para calcular todas as distâncias usando Dijkstra
+# Função para calcular todas as distâncias usando Dijkstra (intermediação, medir o grau de importância de cada vértice)
 def calcular_todas_distancias_dijkstra(grafo):
     n = grafo.shape[0]
     distancias = np.full((n, n), np.inf)
@@ -214,7 +214,7 @@ def caminho_medio(distancias):
                 cont += 1
     return soma / cont if cont > 0 else 0
 
-# Função para calcular o diâmetro do grafo
+# Função para calcular o diâmetro do grafo, ou seja, a maior distância entre quaisquer dois vértices
 def diametro(distancias):
     n = distancias.shape[0]
     max_dist = 0
