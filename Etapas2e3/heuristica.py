@@ -7,7 +7,7 @@ def iterated_local_search_optimized(servicos, distance_matrix, capacity, depot, 
     routes = [two_opt_simple(r, distance_matrix, depot) for r in routes]
     best_routes = copy.deepcopy(routes)
     best_cost = total_solution_cost(best_routes, distance_matrix, depot)
-    for _ in range(min(iterations, 200)):
+    for _ in range(iterations): # 100 vezes de perturbação
         # Perturbação
         perturbed = perturbation(routes, capacity)
         # 2-opt-simple na solução perturbada
@@ -32,6 +32,7 @@ def algoritmo_clarke_wright(servicos, deposito, matriz_distancias, capacidade):
     return rotas
 
 # fuções auxiliares de clarke_wright para construir rotas iniciais, calcular savings e tentar fundir rotas
+# Constrói rotas iniciais, cada serviço, [deposito -> servico -> deposito]
 def construir_rotas_iniciais(servicos, deposito, capacidade):
     rotas = []
     demandas = []
@@ -41,9 +42,11 @@ def construir_rotas_iniciais(servicos, deposito, capacidade):
             raise ValueError(f"Serviço {serv['id_servico']} demanda maior que capacidade do veículo!")
         rotas.append([serv])
         demandas.append(demanda)
-    return rotas, demandas
+    return rotas, demandas #retorno todas rotas e demandas
 
+# calculo as maiores economias de custo (savings) entre pares de serviços, o quanto economizo fazendo uma rota conjunta, [D -> i -> j -> D] 
 def calcular_savings(rotas, matriz_distancias, deposito):
+    # savings é uma lista de tuplas (economia, indice_i, indice_j)
     savings = []
     n = len(rotas)
     for i in range(n):
@@ -63,6 +66,7 @@ def calcular_savings(rotas, matriz_distancias, deposito):
     savings.sort(key=lambda x: x[0], reverse=True)
     return savings
 
+# tento fundir duas rotas se a demanda total não exceder a capacidade e não houver serviços em comum, analiso apenas as extremidades da minha rota
 def tentar_fundir_rotas(rotas, demandas, idx_i, idx_j, capacidade):
     rota_i = rotas[idx_i]
     rota_j = rotas[idx_j]
@@ -188,7 +192,7 @@ def salvar_solucao(
         custo_total_solucao += custo_rota
 
         total_visitas = 2 + len(servicos_unicos)
-
+        # Formato do padrão da linha
         linha = f"0 1 {idx_rota} {demanda_rota} {custo_rota} {total_visitas} (D {deposito},1,1)"
 
         servicos_impressos = set()
@@ -211,54 +215,3 @@ def salvar_solucao(
             f.write(linha + "\n")
 
     print(f"Solução salva em '{nome_arquivo}' com {total_rotas} rotas e custo total {custo_total_solucao}.")
-
-
-# Heurística GRASP para VRP: construção semi-gulosa randomizada + busca local 2-opt-simple (ideal para problemas menores)
-def grasp_heuristic(servicos, distance_matrix, capacity, depot, iterations, alpha):
-    best_routes = None
-    best_cost = float('inf')
-    for _ in range(iterations):
-        rotas = grasp_constructive(servicos, distance_matrix, capacity, depot, alpha)
-        # Busca local 2-opt-simple em cada rota
-        rotas = [two_opt_simple(r, distance_matrix, depot) for r in rotas]
-        cost = total_solution_cost(rotas, distance_matrix, depot)
-        if cost < best_cost:
-            best_routes = copy.deepcopy(rotas)
-            best_cost = cost
-    return best_routes
-
-# Função construção gulosa randomizada de solução para VRP usando LRC(Lista Restrita de Candidatos).
-def grasp_constructive(servicos, distance_matrix, capacity, depot, alpha):
-    # Inicializa todos os serviços como não atendidos
-    nao_atendidos = set(range(len(servicos)))
-    rotas = []
-    while nao_atendidos:
-        rota = []
-        carga = 0
-        atual = depot
-        while True:
-            # Calcula candidatos viáveis
-            candidatos = []
-            for idx in nao_atendidos:
-                s = servicos[idx]
-                if carga + s['demanda'] <= capacity:
-                    custo = distance_matrix[atual][s['origem']]
-                    candidatos.append((custo, idx))
-            if not candidatos:
-                break
-            candidatos.sort()
-            # LRC: seleciona aleatoriamente entre os melhores (alpha controla tamanho)
-            lrc_size = max(1, int(alpha * len(candidatos)))
-            lrc = candidatos[:lrc_size]
-            _, escolhido_idx = random.choice(lrc)
-            s = servicos[escolhido_idx]
-            rota.append(s)
-            carga += s['demanda']
-            atual = s['destino']
-            nao_atendidos.remove(escolhido_idx)
-        if rota:
-            rotas.append(rota)
-    return rotas
-
-
-

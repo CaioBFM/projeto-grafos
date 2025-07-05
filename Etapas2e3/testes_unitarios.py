@@ -3,7 +3,7 @@ import os
 import time
 import psutil
 from concurrent.futures import ProcessPoolExecutor # ProcessPoolExecutor para paralelizar o processamento melhorando o desempenho
-from heuristica import salvar_solucao, iterated_local_search_optimized, grasp_heuristic
+from heuristica import salvar_solucao, iterated_local_search_optimized
 from grafo_utils import construir_grafo_e_dados, ler_instancia
 
 # Função para processar uma instancia e gerar a solução (testes unitários)
@@ -52,10 +52,8 @@ def processar_teste_unitario_automatico(nome_dat):
         id_servico += 1
     matriz_distancias = matriz_menores_distancias(nos, arestas_req, arcos_req, arestas_nr, arcos_nr)
     clock_ini_sol = time.perf_counter_ns()
-    if len(servicos) > 200: 
-        rotas = iterated_local_search_optimized(servicos, matriz_distancias, Q, v0, iterations=100) # aumento do numero de perturbações para melhores resultados
-    else:
-        rotas = grasp_heuristic(servicos, matriz_distancias, Q, v0, iterations=100, alpha=0.2) # nova heurística GRASP para instâncias pequenas, alpha define o quão guloso é o algoritmo
+    # Se o número de serviços for maior que 200, usar Clarke & Wright Savings
+    rotas = iterated_local_search_optimized(servicos, matriz_distancias, Q, v0, iterations=100) # aumento do numero de perturbações para melhores resultados
     nome_saida = saida_base + ".dat"
     clock_fim_sol = time.perf_counter_ns()
     clock_sol = clock_fim_sol - clock_ini_sol

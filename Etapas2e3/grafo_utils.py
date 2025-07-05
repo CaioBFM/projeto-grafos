@@ -56,7 +56,7 @@ def ler_instancia(caminho):
     
 import numpy as np
 
-# Função para construir o grafo e os dados a partir das listas de nós, arestas e arcos
+# Função para construir o grafo (matriz) e os dados a partir das listas de nós, arestas e arcos
 def construir_grafo_e_dados(nos, arestas_req, arcos_req, arestas_nr, arcos_nr):
     vertices = set()
     for v, _ in nos:
