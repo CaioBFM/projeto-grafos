@@ -18,10 +18,10 @@ Este projeto resolve o problema de roteamento de serviços em grafos (CARP - Cap
 
 ## Descrição Geral
 
-O projeto lê instâncias do CARP a partir de arquivos `.dat`, processa cada instância com algoritmos eficientes (Clarke & Wright, GRASP, ILS), exporta as soluções em formato padronizado e permite análise comparativa e visualização gráfica dos resultados.
+O projeto lê instâncias do CARP a partir de arquivos `.dat`, processa cada instância com algoritmos eficientes (Clarke & Wright, ILS), exporta as soluções em formato padronizado e permite análise comparativa e visualização gráfica dos resultados.
 
 - **Problema resolvido:** CARP (roteamento de veículos em grafos com restrições de capacidade)
-- **Abordagens:** Algoritmo de Clarke & Wright, GRASP (Greedy Randomized Adaptive Search Procedure), Iterated Local Search (ILS)
+- **Abordagens:** Algoritmo de Clarke & Wright, Iterated Local Search (ILS)
 - **Resultados:** Soluções salvas em arquivos, métricas de desempenho, comparação com valores de referência, visualização gráfica
 
 ---
@@ -58,7 +58,6 @@ graph-routing-solver/
 Da Etapa 2 para a Etapa 3, o projeto passou por diversas melhorias importantes:
 
 - **Otimização do tempo de processamento**: Utilização da biblioteca padrão do Python (`concurrent.futures`), com o módulo `ProcessPoolExecutor`, permitindo execução paralela e acelerando o processamento de múltiplas instâncias.
-- **Nova heurística para instâncias pequenas**: Implementação do método GRASP (Greedy Randomized Adaptive Search Procedure) com busca local 2-opt, melhorando significativamente os resultados para problemas com menos de 200 serviços.
 - **Organização e limpeza do código**: Remoção de funções desnecessárias ou duplicadas, como as antigas funções de criação de grafos e leitura de instâncias, e divisão das etapas em pastas tornando o código mais limpo e modular.
 - **Aprimoramento da busca local**: Aumento do número de iterações na busca local para refinar ainda mais as soluções, sem comprometer o desempenho devido à otimização do processamento.
 - **Facilidade na comparação de soluções**: Criação dos arquivos `gerar_comparacao.py` e `comparacao_solucoes.csv`, permitindo comparar automaticamente as soluções obtidas com os valores de referência de forma prática e padronizada.
@@ -69,9 +68,8 @@ Da Etapa 2 para a Etapa 3, o projeto passou por diversas melhorias importantes:
 
 - **Leitura e processamento de instâncias** no formato `.dat`
 - **Execução de heurísticas**:
-  - Clarke & Wright Savings (para instâncias grandes)
-  - Iterated Local Search (ILS) (refino das soluções de instâncias grandes)
-  - GRASP + 2-opt (para instâncias pequenas)
+  - Clarke & Wright Savings
+  - Iterated Local Search (ILS) (refino das soluções)
 - **Exportação padronizada das soluções** (incluindo rotas, custos, tempos)
 - **Comparação automática** com valores de referência
 - **Visualização gráfica** das soluções e métricas no notebook
@@ -85,7 +83,7 @@ Da Etapa 2 para a Etapa 3, o projeto passou por diversas melhorias importantes:
 ### 1. Navegue até o diretório do projeto
 
 ```
-cd /caminho/para/seu/graph_routing_solver/Etapas2e3
+cd /caminho/para/seu/projeto-grafos/Etapas2e3
 ```
 
 ### 2. Depêndencias
